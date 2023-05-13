@@ -137,3 +137,45 @@ function arrowRelease() {
     arrowDelay = 0;
     clearTimeout(setLoop);
 }
+function left() {
+    settingsArrow = 1;
+    s = this.parentNode.id;
+    this.onmouseup = arrowRelease;
+    this.onmouseout = arrowRelease;
+    settingsLoop();
+}
+function right() {
+    settingsArrow = 0;
+    s = this.parentNode.id;
+    this.onmouseup = arrowRelease;
+    this.onmouseout = arrowRelease;
+    settingsLoop();
+}
+
+
+function saveSetting(s) {
+    localStorage['version'] = version;
+
+    document.getElementById(s).getElementsByTagName('span')[0].innerHTML =
+        setting[s][settings[s]];
+
+    localStorage['settings'] = JSON.stringify(settings);
+}
+function loadLocalData() {
+    if (localStorage['binds']) {
+        binds = JSON.parse(localStorage.getItem('binds'));
+        for (var i = 0, len = controlCells.length; i < len; i++) {
+            controlCells[i].innerHTML = key[binds[controlCells[i].id]];
+        }
+    }
+    //  cập nhật với nội dung mới, phần còn lại k thay đổi
+    if (localStorage['version'] !== version) {
+        localStorage.removeItem('settings');
+        localStorage.removeItem('binds');
+    }
+    if (localStorage['settings']) {
+        settings = JSON.parse(localStorage.getItem('settings'));
+    }
+}
+statistics
+loadLocalData();
