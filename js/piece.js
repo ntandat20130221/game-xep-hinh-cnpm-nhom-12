@@ -14,7 +14,6 @@ function Piece() {
     this.finesse = 0;
     this.dirty = false;
 }
-
 /**
  * Removes last active piece, and gets the next active piece from the grab bag.
  */
@@ -50,8 +49,7 @@ function Piece() {
 //     menu(3);
 //   }
 // };
-
-Piece.prototype.rotate = function (direction) {
+Piece.prototype.rotate = function(direction) {
     // Rotates tetromino.
     var rotated = [];
     if (direction === -1) {
@@ -92,8 +90,7 @@ Piece.prototype.rotate = function (direction) {
         }
     }
 };
-
-Piece.prototype.checkShift = function () {
+Piece.prototype.checkShift = function() {
     // Shift key pressed event.
     if (keysDown & flags.moveLeft && !(lastKeys & flags.moveLeft)) {
         this.shiftDelay = 0;
@@ -174,8 +171,7 @@ Piece.prototype.checkShift = function () {
         }
     }
 };
-
-Piece.prototype.shift = function (direction) {
+Piece.prototype.shift = function(direction) {
     this.arrDelay = 0;
     if (settings.ARR === 0 && this.shiftDelay === settings.DAS) {
         for (var i = 1; i < 10; i++) {
@@ -188,28 +184,24 @@ Piece.prototype.shift = function (direction) {
         this.x += direction;
     }
 };
-
-Piece.prototype.shiftDown = function () {
+Piece.prototype.shiftDown = function() {
     if (this.moveValid(0, 1, this.tetro)) {
         var grav = gravityArr[settings['Soft Drop'] + 1];
         if (grav > 1) this.y += this.getDrop(grav);
         else this.y += grav;
     }
 };
-
-Piece.prototype.hardDrop = function () {
+Piece.prototype.hardDrop = function() {
     this.y += this.getDrop(20);
     this.lockDelay = settings['Lock Delay'];
 };
-
-Piece.prototype.getDrop = function (distance) {
+Piece.prototype.getDrop = function(distance) {
     for (var i = 1; i <= distance; i++) {
         if (!this.moveValid(0, i, this.tetro)) return i - 1;
     }
     return i - 1;
 };
-
-Piece.prototype.hold = function () {
+Piece.prototype.hold = function() {
     var temp = hold.piece;
     if (!this.held) {
         if (hold.piece !== void 0) {
@@ -223,13 +215,12 @@ Piece.prototype.hold = function () {
         hold.draw();
     }
 };
-
 /**
  * Checks if position and orientation passed is valid.
  *  We call it for every action instead of only once a frame in case one
  *  of the actions is still valid, we don't want to block it.
  */
-Piece.prototype.moveValid = function (cx, cy, tetro) {
+Piece.prototype.moveValid = function(cx, cy, tetro) {
     cx = cx + this.x;
     cy = Math.floor(cy + this.y);
 
@@ -249,11 +240,7 @@ Piece.prototype.moveValid = function (cx, cy, tetro) {
     this.lockDelay = 0;
     return true;
 };
-
-/**
- * Function này được gọi từ function update() trong file tetris.js.
- */
-Piece.prototype.update = function () {
+Piece.prototype.update = function() {
     if (this.moveValid(0, 1, this.tetro)) {
         landed = false;
         if (settings.Gravity) {
@@ -267,7 +254,6 @@ Piece.prototype.update = function () {
         landed = true;
         this.y = Math.floor(this.y);
         if (this.lockDelay >= settings['Lock Delay']) {
-            // 8. Sau khi piece đã được cập nhật thì tiến hành thêm vào stack để được vẽ lên màn hình.
             stack.addPiece(this.tetro);
             this.new(preview.next());
         } else {
@@ -280,12 +266,10 @@ Piece.prototype.update = function () {
         }
     }
 };
-
-Piece.prototype.draw = function () {
+Piece.prototype.draw = function() {
     draw(this.tetro, this.x, this.y, activeCtx);
 };
-
-Piece.prototype.drawGhost = function () {
+Piece.prototype.drawGhost = function() {
     if (!settings.Ghost && !landed) {
         draw(this.tetro, this.x, this.y + this.getDrop(22), activeCtx, 0);
     } else if (settings.Ghost === 1 && !landed) {
