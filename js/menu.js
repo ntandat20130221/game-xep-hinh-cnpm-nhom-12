@@ -183,3 +183,25 @@ function loadLocalData() {
 }
 statistics
 loadLocalData();
+for (var s in settings) {
+    var div = document.createElement('div');
+    var b = document.createElement('b');
+    var iLeft = document.createElement('i');
+    var span = document.createElement('span');
+    var iRight = document.createElement('i');
+
+    div.id = s;
+    b.innerHTML = s + ':';
+    span.innerHTML = setting[s][settings[s]];
+    iLeft.className = 'left';
+    iRight.className = 'right';
+    iLeft.onmousedown = left;
+    iRight.onmousedown = right;
+
+    set.appendChild(div);
+    div.appendChild(b);
+    div.appendChild(iLeft);
+    div.appendChild(span);
+    div.appendChild(iRight);
+}
+resize();
