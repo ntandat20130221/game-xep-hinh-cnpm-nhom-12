@@ -104,11 +104,15 @@ var key = {
  * Show and hide menus.
  */
 var menus = document.getElementsByClassName('menu');
+
+// Đạt: 4. Được gọi trong function init() trong file tetris.js dùng để ẩn tất cả các menu.
 function menu(menuIndex) {
     for (var i = 0, len = menus.length; i < len; i++) {
         menus[i].classList.remove('on');
     }
-    if (menuIndex !== void 0) menus[menuIndex].classList.add('on');
+    if (menuIndex !== void 0)
+        // Đạt: 13. Nếu `menuIndex == 4` thì hiện hiện menu tạm dừng.
+        menus[menuIndex].classList.add('on');
 }
 
 // Hửu Phước

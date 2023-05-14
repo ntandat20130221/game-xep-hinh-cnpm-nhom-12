@@ -75,9 +75,77 @@ function init(gt) {
 
     if (gameState === 3) {
         gameState = 2;
-
+        // 5. Thực hiện vòng lặp để lấy dữ liệu và cập nhật màn hình.
         gameLoop();
     } else {
         gameState = 2;
+    }
+}
+
+function gameLoop() {
+    requestAnimFrame(gameLoop);
+
+    frame++;
+
+    if (gameState === 0) {
+
+        if (!paused) {
+            // 6. Gọi phương thức update() để thực hiện lấy đữ liệu và cập nhật màn hình.
+            update();
+        }
+
+        if (
+            piece.x !== lastX ||
+            Math.floor(piece.y) !== lastY ||
+            piece.pos !== lastPos ||
+            piece.dirty
+        ) {
+            clear(activeCtx);
+            piece.drawGhost();
+            piece.draw();
+        }
+        lastX = piece.x;
+        lastY = Math.floor(piece.y);
+        lastPos = piece.pos;
+        piece.dirty = false;
+    } else if (gameState === 2) {
+
+        if (frame < 50) {
+            if (msg.innerHTML !== 'READY') msg.innerHTML = 'READY';
+        } else if (frame < 100) {
+            if (msg.innerHTML !== 'GO!') msg.innerHTML = 'GO!';
+        } else {
+            msg.innerHTML = '';
+            gameState = 0;
+            startTime = Date.now();
+            piece.new(preview.next());
+        }
+
+        if (lastKeys !== keysDown && !watchingReplay) {
+            replayKeys[frame] = keysDown;
+        } else if (frame in replayKeys) {
+            keysDown = replayKeys[frame];
+        }
+        if (keysDown & flags.moveLeft) {
+            lastKeys = keysDown;
+            piece.shiftDelay = settings.DAS;
+            piece.shiftReleased = false;
+            piece.shiftDir = -1;
+        } else if (keysDown & flags.moveRight) {
+            lastKeys = keysDown;
+            piece.shiftDelay = settings.DAS;
+            piece.shiftReleased = false;
+            piece.shiftDir = 1;
+        }
+    } else if (toGreyRow >= 2) {
+
+        if (toGreyRow === 21) clear(activeCtx);
+        if (frame % 2) {
+            for (var x = 0; x < 10; x++) {
+                if (stack.grid[x][toGreyRow]) stack.grid[x][toGreyRow] = gameState - 1;
+            }
+            stack.draw();
+            toGreyRow--;
+        }
     }
 }
