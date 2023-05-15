@@ -266,9 +266,11 @@ Piece.prototype.update = function() {
         }
     }
 };
+//draw() vẽ khối
 Piece.prototype.draw = function() {
     draw(this.tetro, this.x, this.y, activeCtx);
 };
+//drawGhost() vẽ bóng cho khối hình
 Piece.prototype.drawGhost = function() {
     if (!settings.Ghost && !landed) {
         draw(this.tetro, this.x, this.y + this.getDrop(22), activeCtx, 0);
