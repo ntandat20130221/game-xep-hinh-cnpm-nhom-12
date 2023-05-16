@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * 2. Sau khi người chơi nhấn nút "Watch Replay", function này sẽ được gọi với tham số là `replay`.
+ * Tấn Đạt: 2. Sau khi người chơi nhấn nút "Watch Replay", function này sẽ được gọi với tham số là `replay`.
  * Nó sẽ khởi tạo lại tất cả các biến cho việc replay và thực hiện vòng lặp.
  */
 function init(gt) {
@@ -69,16 +69,74 @@ function init(gt) {
         stack.draw();
     }
 
-    // 3. Function này nằm trong file menu.js, được gọi với tham số là undefined, do đó
+    // Tấn Đạt: 3. Function này nằm trong file menu.js, được gọi với tham số là undefined, do đó
     // tất cả menu sẽ được ẩn đi.
     menu();
 
     if (gameState === 3) {
         gameState = 2;
-        // 5. Thực hiện vòng lặp để lấy dữ liệu và cập nhật màn hình.
+        // Tấn Đạt: 5. Thực hiện vòng lặp để lấy dữ liệu và cập nhật màn hình.
         gameLoop();
     } else {
         gameState = 2;
+    }
+}
+
+function update() {
+    if (lastKeys !== keysDown && !watchingReplay) {
+        replayKeys[frame] = keysDown;
+    } else if (frame in replayKeys) {
+        // Do `watchingReplay` bằng true nên đoạn code này sẽ được gọi.
+        // Tiến hành lấy mã ký tự trong biến `replayKeys` tương ứng với `frame` hiện tại.
+        keysDown = replayKeys[frame];
+    }
+
+    if (!(lastKeys & flags.holdPiece) && flags.holdPiece & keysDown) {
+        piece.hold();
+    }
+
+    if (flags.rotLeft & keysDown && !(lastKeys & flags.rotLeft)) {
+        piece.rotate(-1);
+        piece.finesse++;
+    } else if (flags.rotRight & keysDown && !(lastKeys & flags.rotRight)) {
+        piece.rotate(1);
+        piece.finesse++;
+    } else if (flags.rot180 & keysDown && !(lastKeys & flags.rot180)) {
+        piece.rotate(1);
+        piece.rotate(1);
+        piece.finesse++;
+    }
+
+    piece.checkShift();
+
+    if (flags.moveDown & keysDown) {
+        piece.shiftDown();
+    }
+    if (!(lastKeys & flags.hardDrop) && flags.hardDrop & keysDown) {
+        piece.hardDrop();
+    }
+
+    // Tấn Đạt: 7. Cập nhật piece để tiến hành vẽ lên màn hình.
+    piece.update();
+
+    if (gametype !== 3) {
+        if (lines >= lineLimit) {
+            gameState = 1;
+            msg.innerHTML = 'GREAT!';
+            menu(3);
+        }
+    } else {
+        if (digLines.length === 0) {
+            gameState = 1;
+            msg.innerHTML = 'GREAT!';
+            menu(3);
+        }
+    }
+
+    statistics();
+
+    if (lastKeys !== keysDown) {
+        lastKeys = keysDown;
     }
 }
 
@@ -90,7 +148,7 @@ function gameLoop() {
     if (gameState === 0) {
 
         if (!paused) {
-            // 6. Gọi phương thức update() để thực hiện lấy đữ liệu và cập nhật màn hình.
+            // Tấn Đạt: 6. Gọi phương thức update() để thực hiện lấy đữ liệu và cập nhật màn hình.
             update();
         }
 
