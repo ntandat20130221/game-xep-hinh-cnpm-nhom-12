@@ -254,6 +254,7 @@ Piece.prototype.update = function() {
         landed = true;
         this.y = Math.floor(this.y);
         if (this.lockDelay >= settings['Lock Delay']) {
+            // 8. Sau khi piece đã được cập nhật thì tiến hành thêm vào stack để được vẽ lên màn hình.
             stack.addPiece(this.tetro);
             this.new(preview.next());
         } else {
