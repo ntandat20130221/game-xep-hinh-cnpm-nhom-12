@@ -78,13 +78,9 @@ Stack.prototype.addPiece = function (tetro) {
     this.draw();
 };
 
-/**
- * Được gọi trong function addPiece() bên trên.
- */
 Stack.prototype.draw = function () {
-    // Làm trống màn hình.
     clear(stackCtx);
-    // 9. Gọi hàm draw trong file tetris.js để vẽ lên màn hình.
+    // Tấn Đạt: 9. Gọi hàm draw trong file tetris.js để vẽ lên màn hình.
     draw(this.grid, 0, 0, stackCtx);
 
     stackCtx.globalCompositeOperation = 'source-atop';
