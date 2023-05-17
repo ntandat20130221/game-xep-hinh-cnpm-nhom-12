@@ -208,6 +208,62 @@ function gameLoop() {
     }
 }
 
+function drawCell(x, y, color, ctx) {
+    x = x * cellSize;
+    x = ~~x;
+    y = ~~y * cellSize - 2 * cellSize;
+
+    // Tấn Đạt: 10. Tiến hành vẽ lại màn hình.
+    ctx.drawImage(
+        spriteCanvas,
+        color * cellSize,
+        0,
+        cellSize,
+        cellSize,
+        x,
+        y,
+        cellSize,
+        cellSize,
+    );
+}
+
+addEventListener(
+    'keydown',
+    function (e) {
+        if ([32, 37, 38, 39, 40].indexOf(e.keyCode) !== -1) e.preventDefault();
+        if (e.keyCode === binds.pause) {
+            if (paused) {
+                unpause();
+            } else {
+                // Tấn Đạt: 11. Người chơi nhấn ESC đẽ tạm dừng trong khi đang replay.
+                pause();
+            }
+        }
+        if (e.keyCode === binds.retry) {
+            init(gametype);
+        }
+        if (!watchingReplay) {
+            if (e.keyCode === binds.moveLeft) {
+                keysDown |= flags.moveLeft;
+            } else if (e.keyCode === binds.moveRight) {
+                keysDown |= flags.moveRight;
+            } else if (e.keyCode === binds.moveDown) {
+                keysDown |= flags.moveDown;
+            } else if (e.keyCode === binds.hardDrop) {
+                keysDown |= flags.hardDrop;
+            } else if (e.keyCode === binds.rotRight) {
+                keysDown |= flags.rotRight;
+            } else if (e.keyCode === binds.rotLeft) {
+                keysDown |= flags.rotLeft;
+            } else if (e.keyCode === binds.rot180) {
+                keysDown |= flags.rot180;
+            } else if (e.keyCode === binds.holdPiece) {
+                keysDown |= flags.holdPiece;
+            }
+        }
+    },
+    false,
+);
 
 
 /**
@@ -239,7 +295,7 @@ var spriteCtx = spriteCanvas.getContext('2d');
  * Setting
  */
 
-<!-- Hửu Phước -->
+/* Hửu Phước */
 var cellSize;
 var gravityUnit = 0.00390625;
 var gravity;
