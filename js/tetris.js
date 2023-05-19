@@ -82,6 +82,111 @@ function init(gt) {
     }
 }
 
+function range(start, end, inc) {
+    inc = inc || 1;
+    var array = [];
+    for (var i = start; i < end; i += inc) {
+        array.push(i);
+    }
+    return array;
+}
+
+Number.prototype.mod = function (n) {
+    return ((this % n) + n) % n;
+};
+
+window.requestAnimFrame = (function () {
+    return (
+        window.requestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        function (callback) {
+            window.setTimeout(callback, 1000 / 60);
+        }
+    );
+})();
+
+function pause() {
+    if (gameState === 0) {
+        paused = true;
+        startPauseTime = Date.now();
+        msg.innerHTML = 'Paused';
+        // 12. Gọi phương thức menu() trong file menu.js với tham số là 4 để hiện menu ở index số 4
+        menu(4);
+    }
+}
+
+function unpause() {
+    paused = false;
+    pauseTime += Date.now() - startPauseTime;
+    msg.innerHTML = '';
+    menu();
+}
+
+var rng = new function () {
+    this.seed = 1;
+    this.next = function () {
+        return this.gen() / 2147483647;
+    };
+    this.gen = function () {
+        return (this.seed = (this.seed * 16807) % 2147483647);
+    };
+}();
+
+function statistics() {
+    var time = Date.now() - startTime - pauseTime;
+    var seconds = ((time / 1000) % 60).toFixed(2);
+    var minutes = ~~(time / 60000);
+    statsTime.innerHTML =
+        (minutes < 10 ? '0' : '') + minutes + (seconds < 10 ? ':0' : ':') + seconds;
+}
+
+function bg(ctx) {
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.fillStyle = '#1c1c1c';
+    for (var x = -1; x < ctx.canvas.width + 1; x += cellSize) {
+        ctx.fillRect(x, 0, 2, ctx.canvas.height);
+    }
+    for (var y = -1; y < ctx.canvas.height + 1; y += cellSize) {
+        ctx.fillRect(0, y, ctx.canvas.width, 2);
+    }
+}
+
+function drawCell(x, y, color, ctx) {
+    x = x * cellSize;
+    x = ~~x;
+    y = ~~y * cellSize - 2 * cellSize;
+
+    // Tấn Đạt: 10. Tiến hành vẽ lại màn hình.
+    ctx.drawImage(
+        spriteCanvas,
+        color * cellSize,
+        0,
+        cellSize,
+        cellSize,
+        x,
+        y,
+        cellSize,
+        cellSize,
+    );
+}
+
+function clear(ctx) {
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+}
+
+/**
+ * Được gọi trong phương thức draw() của đối tượng stack.
+ */
+function draw(tetro, cx, cy, ctx, color) {
+    for (var x = 0, len = tetro.length; x < len; x++) {
+        for (var y = 0, wid = tetro[x].length; y < wid; y++) {
+            if (tetro[x][y])
+                drawCell(x + cx, y + cy, color !== void 0 ? color : tetro[x][y], ctx);
+        }
+    }
+}
+
 function update() {
     if (lastKeys !== keysDown && !watchingReplay) {
         replayKeys[frame] = keysDown;
@@ -208,25 +313,6 @@ function gameLoop() {
     }
 }
 
-function drawCell(x, y, color, ctx) {
-    x = x * cellSize;
-    x = ~~x;
-    y = ~~y * cellSize - 2 * cellSize;
-
-    // Tấn Đạt: 10. Tiến hành vẽ lại màn hình.
-    ctx.drawImage(
-        spriteCanvas,
-        color * cellSize,
-        0,
-        cellSize,
-        cellSize,
-        x,
-        y,
-        cellSize,
-        cellSize,
-    );
-}
-
 addEventListener(
     'keydown',
     function (e) {
@@ -299,7 +385,7 @@ var spriteCtx = spriteCanvas.getContext('2d');
 var cellSize;
 var gravityUnit = 0.00390625;
 var gravity;
-var gravityArr = (function() {
+var gravityArr = (function () {
     var array = [];
     array.push(0);
     for (var i = 1; i < 64; i++) array.push(i / 64);
@@ -325,7 +411,7 @@ var settings = {
 var setting = {
     DAS: range(0, 31),
     ARR: range(0, 11),
-    Gravity: (function() {
+    Gravity: (function () {
         var array = [];
         array.push('Auto');
         array.push('0G');
@@ -333,7 +419,7 @@ var setting = {
         for (var i = 1; i <= 20; i++) array.push(i + 'G');
         return array;
     })(),
-    'Soft Drop': (function() {
+    'Soft Drop': (function () {
         var array = [];
         for (var i = 1; i < 64; i++) array.push(i + '/64G');
         for (var i = 1; i <= 20; i++) array.push(i + 'G');
@@ -348,6 +434,7 @@ var setting = {
     Grid: ['Off', 'On'],
     Outline: ['Off', 'On'],
 };
+
 function resize() {
     var a = document.getElementById('a');
     var b = document.getElementById('b');
@@ -556,7 +643,7 @@ function makeSprite() {
             spriteCtx.fillRect(x + cellSize - k, 0, k, cellSize - k);
         }
     }
-}function makeSprite() {
+} function makeSprite() {
     var shaded = [
         // 0         +10        -10        -20
         ['#c1c1c1', '#dddddd', '#a6a6a6', '#8b8b8b'],
@@ -719,38 +806,38 @@ for (var i = 0; i < 9; i++) {
         spriteCtx.lineTo(x + cellSize, cellSize);
         spriteCtx.fill();
     } else if (settings.Block === 1) {
-    // Flat
-    spriteCtx.fillStyle = shaded[i][0];
-    spriteCtx.fillRect(x, 0, cellSize, cellSize);
-} else if (settings.Block === 2) {
-    // Glossy
-    var k = Math.max(~~(cellSize * 0.083), 1);
+        // Flat
+        spriteCtx.fillStyle = shaded[i][0];
+        spriteCtx.fillRect(x, 0, cellSize, cellSize);
+    } else if (settings.Block === 2) {
+        // Glossy
+        var k = Math.max(~~(cellSize * 0.083), 1);
 
-    var grad = spriteCtx.createLinearGradient(x, 0, x + cellSize, cellSize);
-    grad.addColorStop(0.5, glossy[i][3]);
-    grad.addColorStop(1, glossy[i][4]);
-    spriteCtx.fillStyle = grad;
-    spriteCtx.fillRect(x, 0, cellSize, cellSize);
+        var grad = spriteCtx.createLinearGradient(x, 0, x + cellSize, cellSize);
+        grad.addColorStop(0.5, glossy[i][3]);
+        grad.addColorStop(1, glossy[i][4]);
+        spriteCtx.fillStyle = grad;
+        spriteCtx.fillRect(x, 0, cellSize, cellSize);
 
-    var grad = spriteCtx.createLinearGradient(x, 0, x + cellSize, cellSize);
-    grad.addColorStop(0, glossy[i][2]);
-    grad.addColorStop(0.5, glossy[i][1]);
-    spriteCtx.fillStyle = grad;
-    spriteCtx.fillRect(x, 0, cellSize - k, cellSize - k);
+        var grad = spriteCtx.createLinearGradient(x, 0, x + cellSize, cellSize);
+        grad.addColorStop(0, glossy[i][2]);
+        grad.addColorStop(0.5, glossy[i][1]);
+        spriteCtx.fillStyle = grad;
+        spriteCtx.fillRect(x, 0, cellSize - k, cellSize - k);
 
-    var grad = spriteCtx.createLinearGradient(
-        x + k,
-        k,
-        x + cellSize - k,
-        cellSize - k,
-    );
-    grad.addColorStop(0, shaded[i][0]);
-    grad.addColorStop(0.5, glossy[i][0]);
-    grad.addColorStop(0.5, shaded[i][0]);
-    grad.addColorStop(1, glossy[i][0]);
-    spriteCtx.fillStyle = grad;
-    spriteCtx.fillRect(x + k, k, cellSize - k * 2, cellSize - k * 2);
-}
+        var grad = spriteCtx.createLinearGradient(
+            x + k,
+            k,
+            x + cellSize - k,
+            cellSize - k,
+        );
+        grad.addColorStop(0, shaded[i][0]);
+        grad.addColorStop(0.5, glossy[i][0]);
+        grad.addColorStop(0.5, shaded[i][0]);
+        grad.addColorStop(1, glossy[i][0]);
+        spriteCtx.fillStyle = grad;
+        spriteCtx.fillRect(x + k, k, cellSize - k * 2, cellSize - k * 2);
+    }
     else if (settings.Block === 3 || settings.Block === 4) {
         // Arika
         if (settings.Block === 4) tgm = world;
