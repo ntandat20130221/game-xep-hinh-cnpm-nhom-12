@@ -14,41 +14,36 @@ function Piece() {
     this.finesse = 0;
     this.dirty = false;
 }
-/**
- * Removes last active piece, and gets the next active piece from the grab bag.
- */
-// Piece.prototype.new = function(index) {
-//   // TODO if no arguments, get next grabbag piece
-//   this.pos = 0;
-//   this.tetro = [];
-//   this.held = false;
-//   this.finesse = 0;
-//   this.dirty = true;
-//   //TODO change this
-//   landed = false;
-//
-//   // TODO Do this better. Make clone object func maybe.
-//   //for property in pieces, this.prop = piece.prop
-//   this.tetro = pieces[index].tetro;
-//   this.kickData = pieces[index].kickData;
-//   this.x = pieces[index].x;
-//   this.y = pieces[index].y;
-//   this.index = index;
-//
-//   // TODO ---------------- snip
-//
-//   //TODO Do this better. (make grabbag object)
-//   // Preview.next(); == grabbag.next()
-//   // Preview.draw();
-//   //preview.next();
-//
-//   // Check for blockout.
-//   if (!this.moveValid(0, 0, this.tetro)) {
-//     gameState = 9;
-//     msg.innerHTML = 'BLOCK OUT!';
-//     menu(3);
-//   }
-// };
+
+ //Removes last active piece, and gets the next active piece from the grab bag.
+
+Piece.prototype.new = function(index) {
+    // if no arguments, get next grabbag piece
+    this.pos = 0;
+    this.tetro = [];
+    this.held = false;
+    this.finesse = 0;
+    this.dirty = true;
+    //change this
+    landed = false;
+
+    //  Do this better. Make clone object func maybe.
+    // for property in pieces, this.prop = piece.prop
+    this.tetro = pieces[index].tetro;
+    this.kickData = pieces[index].kickData;
+    this.x = pieces[index].x;
+    this.y = pieces[index].y;
+    this.index = index;
+
+
+
+    // Check for blockout.
+    if (!this.moveValid(0, 0, this.tetro)) {
+        gameState = 9;
+        msg.innerHTML = 'BLOCK OUT!';
+        menu(3);
+    }
+};
 Piece.prototype.rotate = function(direction) {
     // Rotates tetromino.
     var rotated = [];
@@ -254,7 +249,6 @@ Piece.prototype.update = function() {
         landed = true;
         this.y = Math.floor(this.y);
         if (this.lockDelay >= settings['Lock Delay']) {
-            // Tấn Đạt: 8. Sau khi piece đã được cập nhật thì tiến hành thêm vào stack để được vẽ lên màn hình.
             stack.addPiece(this.tetro);
             this.new(preview.next());
         } else {
@@ -267,11 +261,9 @@ Piece.prototype.update = function() {
         }
     }
 };
-//draw() vẽ khối
 Piece.prototype.draw = function() {
     draw(this.tetro, this.x, this.y, activeCtx);
 };
-//drawGhost() vẽ bóng cho khối hình
 Piece.prototype.drawGhost = function() {
     if (!settings.Ghost && !landed) {
         draw(this.tetro, this.x, this.y + this.getDrop(22), activeCtx, 0);
