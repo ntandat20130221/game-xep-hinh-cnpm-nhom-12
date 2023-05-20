@@ -160,6 +160,7 @@ addEventListener(
 );
 
 /**
+ * Hửu Phước
  * Settings Menu
  */
 function settingsLoop() {
