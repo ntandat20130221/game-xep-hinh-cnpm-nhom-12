@@ -5,8 +5,6 @@ var column;
 
 var pieces = [PieceI, PieceJ, PieceL, PieceO, PieceS, PieceT, PieceZ];
 
-//Gameplay specific vars.
-
 var frame;
 
 /**
@@ -549,78 +547,6 @@ var setting = {
     Outline: ['Off', 'On'],
 };
 
-function resize() {
-    var a = document.getElementById('a');
-    var b = document.getElementById('b');
-    var c = document.getElementById('c');
-    var content = document.getElementById('content');
-
-    // Aspect ratio: 1.024
-    var screenHeight = window.innerHeight - 34;
-    var screenWidth = ~~(screenHeight * 1.024);
-    if (screenWidth > window.innerWidth)
-        screenHeight = ~~(window.innerWidth / 1.024);
-
-    if (settings.Size === 1 && screenHeight > 602) cellSize = 15;
-    else if (settings.Size === 2 && screenHeight > 602) cellSize = 30;
-    else if (settings.Size === 3 && screenHeight > 902) cellSize = 45;
-    else cellSize = Math.max(~~(screenHeight / 20), 10);
-
-    var pad = (window.innerHeight - (cellSize * 20 + 2)) / 2 + 'px';
-    content.style.padding = pad + ' 0';
-    stats.style.bottom = pad;
-
-    // Size elements
-    a.style.padding = '0 0.5rem ' + ~~(cellSize / 2) + 'px';
-
-    stackCanvas.width = activeCanvas.width = bgStackCanvas.width = cellSize * 10;
-    stackCanvas.height = activeCanvas.height = bgStackCanvas.height =
-        cellSize * 20;
-    b.style.width = stackCanvas.width + 'px';
-    b.style.height = stackCanvas.height + 'px';
-
-    holdCanvas.width = cellSize * 4;
-    holdCanvas.height = cellSize * 2;
-    a.style.width = holdCanvas.width + 'px';
-    a.style.height = holdCanvas.height + 'px';
-
-    previewCanvas.width = cellSize * 4;
-    previewCanvas.height = stackCanvas.height;
-    c.style.width = previewCanvas.width + 'px';
-    c.style.height = b.style.height;
-
-
-    msg.style.lineHeight = b.style.height;
-    msg.style.fontSize = ~~(stackCanvas.width / 6) + 'px';
-    stats.style.fontSize = ~~(stackCanvas.width / 11) + 'px';
-    document.documentElement.style.fontSize = ~~(stackCanvas.width / 16) + 'px';
-
-    stats.style.width = a.style.width;
-    for (var i = 0, len = h3.length; i < len; i++) {
-        h3[i].style.lineHeight = a.style.height;
-        h3[i].style.fontSize = stats.style.fontSize;
-    }
-
-    // Redraw graphics
-    makeSprite();
-
-    if (settings.Grid === 1) bg(bgStackCtx);
-
-    if (gameState === 0) {
-        piece.drawGhost();
-        piece.draw();
-        stack.draw();
-        preview.draw();
-        if (hold.piece) {
-            hold.draw();
-        }
-    }
-}
-addEventListener('resize', resize, false);
-
-
-
-
 
 function makeSprite() {
     var shaded = [
@@ -670,7 +596,7 @@ function makeSprite() {
     world[8] = tgm[8];
 
 
-    // Hửu Phước (613-699)
+    // Hửu Phước
     spriteCanvas.width = cellSize * 9;
     spriteCanvas.height = cellSize;
     for (var i = 0; i < 9; i++) {
