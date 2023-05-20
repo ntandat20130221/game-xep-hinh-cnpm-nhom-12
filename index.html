@@ -99,13 +99,10 @@
         </div>
         <!-- HP-->
     
-        <!-- Sau khi người chơi hoàn thành màn game, hoặc khi người chơi thua màn game, 
-            menu này sẽ hiện ra. -->
         <nav class=menu id=go>
             <ul>
                 <li><a onclick=init(gametype)>Retry</a>
-                <!-- Tấn Đạt: 1. Khi người chơi click vào nút này, 
-                    hàm init() trong tệp tetris.js sẽ được gọi với tham số là `replay` -->
+                <!-- Tấn Đạt: 1. Khi người chơi click vào Watch Replay, gọi hàm init(replay) trong tetris.js -->
                 <li><a onclick="init('replay')">Watch Replay</a>
                 <li><a onclick=menu(0)>Main Menu</a>
             </ul>
