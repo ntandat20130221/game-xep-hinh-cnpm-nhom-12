@@ -1,5 +1,348 @@
 'use strict';
 
+//Playfield.
+var cellSize;
+var column;
+
+//Get html elements.
+
+var msg = document.getElementById('msg');
+var stats = document.getElementById('stats');
+var statsTime = document.getElementById('time');
+var statsLines = document.getElementById('line');
+var statsPiece = document.getElementById('piece');
+var h3 = document.getElementsByTagName('h3');
+var set = document.getElementById('settings');
+
+// Get canvases and contexts
+var holdCanvas = document.getElementById('hold');
+var bgStackCanvas = document.getElementById('bgStack');
+var stackCanvas = document.getElementById('stack');
+var activeCanvas = document.getElementById('active');
+var previewCanvas = document.getElementById('preview');
+var spriteCanvas = document.getElementById('sprite');
+
+var holdCtx = holdCanvas.getContext('2d');
+var bgStackCtx = bgStackCanvas.getContext('2d');
+var stackCtx = stackCanvas.getContext('2d');
+var activeCtx = activeCanvas.getContext('2d');
+var previewCtx = previewCanvas.getContext('2d');
+var spriteCtx = spriteCanvas.getContext('2d');
+
+//Piece data
+
+// NOTE y values are inverted since our matrix counts from top to bottom.
+var kickData = [
+    [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0]],
+    [[0, 0], [1, 0], [1, 1], [0, -2], [1, -2]],
+    [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0]],
+    [[0, 0], [-1, 0], [-1, 1], [0, -2], [-1, -2]],
+];
+var kickDataI = [
+    [[0, 0], [-1, 0], [2, 0], [-1, 0], [2, 0]],
+    [[-1, 0], [0, 0], [0, 0], [0, -1], [0, 2]],
+    [[-1, -1], [1, -1], [-2, -1], [1, 0], [-2, 0]],
+    [[0, -1], [0, -1], [0, -1], [0, 1], [0, -2]],
+];
+
+var kickDataO = [[[0, 0]], [[0, 0]], [[0, 0]], [[0, 0]]];
+
+// Define shapes and spawns.
+var PieceI = {
+    index: 0,
+    x: 2,
+    y: -1,
+    kickData: kickDataI,
+    tetro: [
+        [0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 0, 1, 0, 0],
+    ],
+};
+var PieceJ = {
+    index: 1,
+    x: 3,
+    y: 0,
+    kickData: kickData,
+    tetro: [[2, 2, 0], [0, 2, 0], [0, 2, 0]],
+};
+var PieceL = {
+    index: 2,
+    x: 3,
+    y: 0,
+    kickData: kickData,
+    tetro: [[0, 3, 0], [0, 3, 0], [3, 3, 0]],
+};
+var PieceO = {
+    index: 3,
+    x: 4,
+    y: 0,
+    kickData: kickDataO,
+    tetro: [[4, 4], [4, 4]],
+};
+var PieceS = {
+    index: 4,
+    x: 3,
+    y: 0,
+    kickData: kickData,
+    tetro: [[0, 5, 0], [5, 5, 0], [5, 0, 0]],
+};
+var PieceT = {
+    index: 5,
+    x: 3,
+    y: 0,
+    kickData: kickData,
+    tetro: [[0, 6, 0], [6, 6, 0], [0, 6, 0]],
+};
+var PieceZ = {
+    index: 6,
+    x: 3,
+    y: 0,
+    kickData: kickData,
+    tetro: [[7, 0, 0], [7, 7, 0], [0, 7, 0]],
+};
+var pieces = [PieceI, PieceJ, PieceL, PieceO, PieceS, PieceT, PieceZ];
+
+// Finesse data
+// index x orientatio x column = finesse
+// finesse[0][0][4] = 1
+// TODO double check these.
+var finesse = [
+    [
+        [1, 2, 1, 0, 1, 2, 1],
+        [2, 2, 2, 2, 1, 1, 2, 2, 2, 2],
+        [1, 2, 1, 0, 1, 2, 1],
+        [2, 2, 2, 2, 1, 1, 2, 2, 2, 2],
+    ],
+    [
+        [1, 2, 1, 0, 1, 2, 2, 1],
+        [2, 2, 3, 2, 1, 2, 3, 3, 2],
+        [2, 3, 2, 1, 2, 3, 3, 2],
+        [2, 3, 2, 1, 2, 3, 3, 2, 2],
+    ],
+    [
+        [1, 2, 1, 0, 1, 2, 2, 1],
+        [2, 2, 3, 2, 1, 2, 3, 3, 2],
+        [2, 3, 2, 1, 2, 3, 3, 2],
+        [2, 3, 2, 1, 2, 3, 3, 2, 2],
+    ],
+    [
+        [1, 2, 2, 1, 0, 1, 2, 2, 1],
+        [1, 2, 2, 1, 0, 1, 2, 2, 1],
+        [1, 2, 2, 1, 0, 1, 2, 2, 1],
+        [1, 2, 2, 1, 0, 1, 2, 2, 1],
+    ],
+    [
+        [1, 2, 1, 0, 1, 2, 2, 1],
+        [2, 2, 2, 1, 1, 2, 3, 2, 2],
+        [1, 2, 1, 0, 1, 2, 2, 1],
+        [2, 2, 2, 1, 1, 2, 3, 2, 2],
+    ],
+    [
+        [1, 2, 1, 0, 1, 2, 2, 1],
+        [2, 2, 3, 2, 1, 2, 3, 3, 2],
+        [2, 3, 2, 1, 2, 3, 3, 2],
+        [2, 3, 2, 1, 2, 3, 3, 2, 2],
+    ],
+    [
+        [1, 2, 1, 0, 1, 2, 2, 1],
+        [2, 2, 2, 1, 1, 2, 3, 2, 2],
+        [1, 2, 1, 0, 1, 2, 2, 1],
+        [2, 2, 2, 1, 1, 2, 3, 2, 2],
+    ],
+];
+
+//Gameplay specific vars.
+
+var gravityUnit = 0.00390625;
+var gravity;
+var gravityArr = (function() {
+    var array = [];
+    array.push(0);
+    for (var i = 1; i < 64; i++) array.push(i / 64);
+    for (var i = 1; i <= 20; i++) array.push(i);
+    return array;
+})();
+
+var settings = {
+    DAS: 10,
+    ARR: 1,
+    Gravity: 0,
+    'Soft Drop': 31,
+    'Lock Delay': 30,
+    Size: 0,
+    Sound: 0,
+    Volume: 100,
+    Block: 0,
+    Ghost: 0,
+    Grid: 0,
+    Outline: 0,
+};
+
+var setting = {
+    DAS: range(0, 31),
+    ARR: range(0, 11),
+    Gravity: (function() {
+        var array = [];
+        array.push('Auto');
+        array.push('0G');
+        for (var i = 1; i < 64; i++) array.push(i + '/64G');
+        for (var i = 1; i <= 20; i++) array.push(i + 'G');
+        return array;
+    })(),
+    'Soft Drop': (function() {
+        var array = [];
+        for (var i = 1; i < 64; i++) array.push(i + '/64G');
+        for (var i = 1; i <= 20; i++) array.push(i + 'G');
+        return array;
+    })(),
+    'Lock Delay': range(0, 101),
+    Size: ['Auto', 'Small', 'Medium', 'Large'],
+    Sound: ['Off', 'On'],
+    Volume: range(0, 101),
+    Block: ['Shaded', 'Solid', 'Glossy', 'Arika', 'World'],
+    Ghost: ['Normal', 'Colored', 'Off'],
+    Grid: ['Off', 'On'],
+    Outline: ['Off', 'On'],
+};
+
+var frame;
+
+/**
+ *Pausing variables
+ */
+
+var startPauseTime;
+var pauseTime;
+
+/**
+ * 0 = Normal
+ * 1 = win
+ * 2 = countdown
+ * 3 = game not played
+ * 9 = loss
+ */
+var gameState = 3;
+
+var paused = false;
+var lineLimit;
+
+var replayKeys;
+var watchingReplay = false;
+var toGreyRow;
+var gametype;
+//Make dirty flags for each canvas, draw them all at once during frame call.
+
+var lastX, lastY, lastPos, landed;
+
+// Stats
+var lines;
+var statsFinesse;
+var piecesSet;
+var startTime;
+var digLines;
+
+// Keys
+var keysDown;
+var lastKeys;
+var released;
+
+var binds = {
+    pause: 27,
+    moveLeft: 37,
+    moveRight: 39,
+    moveDown: 40,
+    hardDrop: 32,
+    holdPiece: 67,
+    rotRight: 88,
+    rotLeft: 90,
+    rot180: 16,
+    retry: 82,
+};
+var flags = {
+    hardDrop: 1,
+    moveRight: 2,
+    moveLeft: 4,
+    moveDown: 8,
+    holdPiece: 16,
+    rotRight: 32,
+    rotLeft: 64,
+    rot180: 128,
+};
+
+function resize() {
+    var a = document.getElementById('a');
+    var b = document.getElementById('b');
+    var c = document.getElementById('c');
+    var content = document.getElementById('content');
+
+
+    var screenHeight = window.innerHeight - 34;
+    var screenWidth = ~~(screenHeight * 1.024);
+    if (screenWidth > window.innerWidth)
+        screenHeight = ~~(window.innerWidth / 1.024);
+
+    if (settings.Size === 1 && screenHeight > 602) cellSize = 15;
+    else if (settings.Size === 2 && screenHeight > 602) cellSize = 30;
+    else if (settings.Size === 3 && screenHeight > 902) cellSize = 45;
+    else cellSize = Math.max(~~(screenHeight / 20), 10);
+
+    var pad = (window.innerHeight - (cellSize * 20 + 2)) / 2 + 'px';
+    content.style.padding = pad + ' 0';
+    stats.style.bottom = pad;
+
+    // Size elements
+    a.style.padding = '0 0.5rem ' + ~~(cellSize / 2) + 'px';
+
+    stackCanvas.width = activeCanvas.width = bgStackCanvas.width = cellSize * 10;
+    stackCanvas.height = activeCanvas.height = bgStackCanvas.height =
+        cellSize * 20;
+    b.style.width = stackCanvas.width + 'px';
+    b.style.height = stackCanvas.height + 'px';
+
+    holdCanvas.width = cellSize * 4;
+    holdCanvas.height = cellSize * 2;
+    a.style.width = holdCanvas.width + 'px';
+    a.style.height = holdCanvas.height + 'px';
+
+    previewCanvas.width = cellSize * 4;
+    previewCanvas.height = stackCanvas.height;
+    c.style.width = previewCanvas.width + 'px';
+    c.style.height = b.style.height;
+
+    // Scale the text so it fits in the thing.
+    // TODO get rid of extra font sizes here.
+    msg.style.lineHeight = b.style.height;
+    msg.style.fontSize = ~~(stackCanvas.width / 6) + 'px';
+    stats.style.fontSize = ~~(stackCanvas.width / 11) + 'px';
+    document.documentElement.style.fontSize = ~~(stackCanvas.width / 16) + 'px';
+
+    stats.style.width = a.style.width;
+    for (var i = 0, len = h3.length; i < len; i++) {
+        h3[i].style.lineHeight = a.style.height;
+        h3[i].style.fontSize = stats.style.fontSize;
+    }
+
+    // Redraw graphics
+    makeSprite();
+
+    if (settings.Grid === 1) bg(bgStackCtx);
+
+    if (gameState === 0) {
+        piece.drawGhost();
+        piece.draw();
+        stack.draw();
+        preview.draw();
+        if (hold.piece) {
+            hold.draw();
+        }
+    }
+}
+addEventListener('resize', resize, false);
+
+
 /**
  * Tấn Đạt: 2. Sau khi người chơi nhấn nút "Watch Replay", function này sẽ được gọi với tham số là `replay`.
  * Nó sẽ khởi tạo lại tất cả các biến cho việc replay và thực hiện vòng lặp.
