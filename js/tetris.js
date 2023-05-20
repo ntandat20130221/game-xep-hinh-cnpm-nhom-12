@@ -344,8 +344,7 @@ addEventListener('resize', resize, false);
 
 
 /**
- * Tấn Đạt: 2. Sau khi người chơi nhấn nút "Watch Replay", function này sẽ được gọi với tham số là `replay`.
- * Nó sẽ khởi tạo lại tất cả các biến cho việc replay và thực hiện vòng lặp.
+ * Tấn Đạt: 2. Gọi phương thức init() với tham số là 'replay'.
  */
 function init(gt) {
     if (gt === 'replay') {
@@ -357,7 +356,7 @@ function init(gt) {
         gametype = gt;
     }
 
-    lineLimit = 30;
+    lineLimit = 3;
 
     column = 0;
     keysDown = 0;
@@ -387,7 +386,9 @@ function init(gt) {
 
     statsPiece.innerHTML = piecesSet;
     statsLines.innerHTML = lineLimit - lines;
+    // Tấn Đạt: 3. Khởi tạo lại thời gian về 00:00:00.
     statistics();
+    // Tấn Đạt 4. Làm sạch màn hình, xóa các khối còn sót lại ở màn chơi trước.
     clear(stackCtx);
     clear(activeCtx);
     clear(holdCtx);
@@ -412,13 +413,12 @@ function init(gt) {
         stack.draw();
     }
 
-    // Tấn Đạt: 3. Function này nằm trong file menu.js, được gọi với tham số là undefined, do đó
-    // tất cả menu sẽ được ẩn đi.
+    // Tấn Đạt: 5. Gọi phương thức menu() trong menu.js để ẩn tất cả các menu.
     menu();
 
     if (gameState === 3) {
         gameState = 2;
-        // Tấn Đạt: 5. Thực hiện vòng lặp để lấy dữ liệu và cập nhật màn hình.
+        // Tấn Đạt: 6. Thực hiện vòng lặp để lấy dữ liệu và cập nhật màn hình.
         gameLoop();
     } else {
         gameState = 2;
@@ -454,7 +454,6 @@ function pause() {
         paused = true;
         startPauseTime = Date.now();
         msg.innerHTML = 'Paused';
-        // 12. Gọi phương thức menu() trong file menu.js với tham số là 4 để hiện menu ở index số 4
         menu(4);
     }
 }
@@ -500,7 +499,6 @@ function drawCell(x, y, color, ctx) {
     x = ~~x;
     y = ~~y * cellSize - 2 * cellSize;
 
-    // Tấn Đạt: 10. Tiến hành vẽ lại màn hình.
     ctx.drawImage(
         spriteCanvas,
         color * cellSize,
@@ -534,8 +532,7 @@ function update() {
     if (lastKeys !== keysDown && !watchingReplay) {
         replayKeys[frame] = keysDown;
     } else if (frame in replayKeys) {
-        // Do `watchingReplay` bằng true nên đoạn code này sẽ được gọi.
-        // Tiến hành lấy mã ký tự trong biến `replayKeys` tương ứng với `frame` hiện tại.
+        // Lấy mã ký tự trong biến `replayKeys` tương ứng với `frame` hiện tại.
         keysDown = replayKeys[frame];
     }
 
@@ -564,13 +561,14 @@ function update() {
         piece.hardDrop();
     }
 
-    // Tấn Đạt: 7. Cập nhật piece để tiến hành vẽ lên màn hình.
+    // Tấn Đạt: 8. Cập nhật piece để tiến hành vẽ lên màn hình.
     piece.update();
 
     if (gametype !== 3) {
         if (lines >= lineLimit) {
             gameState = 1;
             msg.innerHTML = 'GREAT!';
+            // Tấn Đạt: 12. Nếu replay kết thức, hiện menu 3 - Menu cho phép người chơi chọn Chơi tiếp, Xem lại reply, hoặc trở về Main menu.
             menu(3);
         }
     } else {
@@ -596,7 +594,7 @@ function gameLoop() {
     if (gameState === 0) {
 
         if (!paused) {
-            // Tấn Đạt: 6. Gọi phương thức update() để thực hiện lấy đữ liệu và cập nhật màn hình.
+            // Tấn Đạt: 7. Gọi phương thức update() để thực hiện lấy đữ liệu và cập nhật màn hình.
             update();
         }
 
@@ -664,7 +662,6 @@ addEventListener(
             if (paused) {
                 unpause();
             } else {
-                // Tấn Đạt: 11. Người chơi nhấn ESC đẽ tạm dừng trong khi đang replay.
                 pause();
             }
         }

@@ -100,22 +100,65 @@ var key = {
     221: ']',
     222: "'",
 };
+
 /**
  * Show and hide menus.
  */
 var menus = document.getElementsByClassName('menu');
-
-// Tấn Đạt: 4. Được gọi trong function init() trong file tetris.js dùng để ẩn tất cả các menu.
 function menu(menuIndex) {
     for (var i = 0, len = menus.length; i < len; i++) {
         menus[i].classList.remove('on');
     }
-    if (menuIndex !== void 0)
-        // Tấn Đạt: 13. Nếu `menuIndex == 4` thì hiện hiện menu tạm dừng.
-        menus[menuIndex].classList.add('on');
+    if (menuIndex !== void 0) menus[menuIndex].classList.add('on');
 }
 
-// Hửu Phước
+/**
+ * Controls Menu
+ */
+var newKey,
+    currCell,
+    tempKey,
+    controls = document.getElementById('controls'),
+    controlCells = controls.getElementsByTagName('td');
+// Give controls an event listener.
+for (var i = 0, len = controlCells.length; i < len; i++) {
+    controlCells[i].onclick = function() {
+        // First check if we're already waiting for an input.
+        if (currCell) {
+            // TODO DRY
+            // Make this into a function and call it when we press Esc.
+            binds[currCell.id] = tempKey;
+            currCell.innerHTML = key[tempKey];
+        }
+        tempKey = binds[this.id];
+        this.innerHTML = 'Press key';
+        currCell = this;
+    };
+}
+// Listen for key input if a control has been clicked on.
+addEventListener(
+    'keyup',
+    function(e) {
+        // if click outside of cell or press esc clear currCell
+        // reset binds button.
+        if (currCell) {
+            // Checks if key already in use, and unbinds it.
+            for (var i in binds) {
+                if (e.keyCode === binds[i]) {
+                    binds[i] = void 0;
+                    document.getElementById(i).innerHTML = binds[i];
+                }
+            }
+            // Binds the key and saves the data.
+            binds[currCell.id] = e.keyCode;
+            currCell.innerHTML = key[e.keyCode];
+            localStorage.setItem('binds', JSON.stringify(binds));
+            currCell = 0;
+        }
+    },
+    false,
+);
+
 /**
  * Settings Menu
  */
@@ -134,7 +177,7 @@ function settingsLoop() {
 }
 var s;
 var settingsArrow;
-
+// TODO DRY this.
 function arrowRelease() {
     resize();
     arrowReleased = true;
@@ -156,7 +199,9 @@ function right() {
     settingsLoop();
 }
 
-
+/**
+ * LocalStorage functions
+ */
 function saveSetting(s) {
     localStorage['version'] = version;
 
@@ -172,7 +217,7 @@ function loadLocalData() {
             controlCells[i].innerHTML = key[binds[controlCells[i].id]];
         }
     }
-    //  cập nhật với nội dung mới, phần còn lại k thay đổi
+    // TODO When new version just update with new stuff, rest stays unchanged.
     if (localStorage['version'] !== version) {
         localStorage.removeItem('settings');
         localStorage.removeItem('binds');
@@ -181,7 +226,7 @@ function loadLocalData() {
         settings = JSON.parse(localStorage.getItem('settings'));
     }
 }
-statistics
+
 loadLocalData();
 for (var s in settings) {
     var div = document.createElement('div');
@@ -205,5 +250,3 @@ for (var s in settings) {
     div.appendChild(iRight);
 }
 resize();
-
-

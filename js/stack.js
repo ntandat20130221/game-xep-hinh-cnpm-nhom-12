@@ -9,10 +9,6 @@ Stack.prototype.new = function (x, y) {
     this.grid = cells;
 };
 
-/**
- * Function này được gọi trong funtion update() của đối tượng Piece.
- * Dùng đê thêm piece vào stack đễ vẽ lên canvas.
- */
 Stack.prototype.addPiece = function (tetro) {
     var once = false;
 
@@ -75,12 +71,13 @@ Stack.prototype.addPiece = function (tetro) {
     if (gametype !== 3) statsLines.innerHTML = lineLimit - lines;
     else statsLines.innerHTML = digLines.length;
 
+    // Tấn Đạt: 10. Gọi phương thức draw().
     this.draw();
 };
 
 Stack.prototype.draw = function () {
     clear(stackCtx);
-    // Tấn Đạt: 9. Gọi hàm draw trong file tetris.js để vẽ lên màn hình.
+    // Tấn Đạt: 11. Gọi phương thức draw() trong tetris.js để vẽ lên màn hình.
     draw(this.grid, 0, 0, stackCtx);
 
     stackCtx.globalCompositeOperation = 'source-atop';
